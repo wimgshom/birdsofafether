@@ -65,7 +65,7 @@
   opacity: 0.7 !important;
 }
 
-/* 小鸟自定义鼠标指针（已将热点校准为 6 4，请按需微调） */
+/* 小鸟自定义鼠标指针 */
 html, body, .HYPE_document, * {
   cursor: url('birds%20website.hyperesources/bird-cursor.png') 6 5, auto !important;
 }
@@ -82,7 +82,7 @@ a, button, [onclick], .hover-gray, .menu-item {
     
     var canvas = document.createElement('canvas');
     canvas.id = 'hype-cursor-particles';
-    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:999999;';
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none !important;z-index:999999;';
     
     if (document.body) {
       document.body.appendChild(canvas);
@@ -109,7 +109,6 @@ a, button, [onclick], .hover-gray, .menu-item {
     window.addEventListener('resize', resize);
     resize();
 
-    // 鼠标位置与偏移设置（已改为 0 0 无额外偏置）
     var mouse = { x: -100, y: -100 };
     var offsetX = 0;
     var offsetY = 0;
@@ -171,51 +170,38 @@ a, button, [onclick], .hover-gray, .menu-item {
 
   initParticleCanvas();
 })();
-
 </script>
+
+<!-- 4. 路由防 404 定位（刷新时只执行一次，绝不干扰点击与转场） -->
 <script>
-// 页面加载或 URL 变化时，根据地址自动切换 Hype 场景
-function initHypeRouter(hypeDocument) {
-  function routeScene() {
-    // 优先读取路径 (如 /menu)，若无则读取锚点哈希 (如 #menu)
-    var path = window.location.pathname.replace(/\/+$/, '').toLowerCase();
-    var hash = window.location.hash.replace('#', '').toLowerCase();
+(function() {
+  var hasRouted = false;
 
-    // 映射表：URL 路径/哈希 对应 Hype 场景的确切名称
-    var routeMap = {
-      '': 'home',
-      '/': 'home',
-      '/menu': 'menu1',
-      '/events': 'events',
-      '/our-story': 'our story',
-      '/menu/drinks': 'menu2'
-    };
+  if (!window.HYPE_eventListeners) window.HYPE_eventListeners = [];
+  window.HYPE_eventListeners.push({
+    "type": "HypeSceneLoad",
+    "callback": function(hypeDocument, element, event) {
+      if (hasRouted) return;
+      hasRouted = true;
 
-    // 检查 hash 备用（例如 yoursite.com/#menu）
-    var targetScene = routeMap[path] || routeMap['/' + hash] || routeMap[hash];
+      var h = window.location.hash.toLowerCase();
 
-    // 如果匹配到有效场景，且当前不在该场景，立即切换
-    if (targetScene && hypeDocument.currentSceneName() !== targetScene) {
-      hypeDocument.showSceneNamed(targetScene, hypeDocument.kSceneTransitionInstant);
+      if (h === '#mainmenu' || h === '#menu') {
+        hypeDocument.showSceneNamed('mainmenu');
+      } else if (h === '#setmenu') {
+        hypeDocument.showSceneNamed('setmenu');
+      } else if (h === '#winelist') {
+        hypeDocument.showSceneNamed('winelist');
+      } else if (h === '#cocktail') {
+        hypeDocument.showSceneNamed('cocktail');
+      } else if (h === '#events') {
+        hypeDocument.showSceneNamed('Events');
+      } else if (h === '#story') {
+        hypeDocument.showSceneNamed('Our Story');
+      }
     }
-  }
-
-  // 1. 首次打开网页时执行
-  routeScene();
-
-  // 2. 监听浏览器前进/后退按钮与哈希变动
-  window.addEventListener('popstate', routeScene);
-  window.addEventListener('hashchange', routeScene);
-}
-
-// 注册到 Hype 引擎全局钩子
-if ('HYPE_eventListeners' in window === false) {
-  window.HYPE_eventListeners = Array();
-}
-window.HYPE_eventListeners.push({
-  type: 'HypeDocumentLoad',
-  callback: initHypeRouter
-});
+  });
+})();
 </script>
 
 	<!-- end copy -->
@@ -224,7 +210,7 @@ window.HYPE_eventListeners.push({
 	<!-- copy these lines to your document: -->
 
 	<div id="birdswebsite_hype_container" class="HYPE_document" style="margin:auto;position:relative;width:100%;height:6800px;overflow:hidden;">
-		<script type="text/javascript" charset="utf-8" src="birds%20website.hyperesources/birdswebsite_hype_generated_script.js?47733"></script>
+		<script type="text/javascript" charset="utf-8" src="birds%20website.hyperesources/birdswebsite_hype_generated_script.js?61144"></script>
 	</div>
 
 	<!-- end copy -->
@@ -247,7 +233,7 @@ Step into our new chapter on Amoy Street, with a renewed space, an evolved menu 
 Come for lunch, dinner or cocktails at the bar, and be among the first to settle back in.</div>
 		<div>Our Menu</div>
 		<div>Reservations</div>
-		<div>Instinct · Precision · Expression · Craft</div>
+		<div>Instinct, Expression, Craft, Precision</div>
 		<div>Events & Celebrations</div>
 		<div>Dine · Gather · Celebrate · Linger</div>
 		<div>A Cuisine of
@@ -272,16 +258,14 @@ Come for lunch, dinner or cocktails at the bar, and be among the first to settle
 </div>
 		<div>Events</div>
 		<div>Where Food, Drinks and People Come Together</div>
-		<div>Natural light, warm textures and considered details create a space that feels relaxed yet refined. From lunch and dinner to cocktails at the bar and celebrations around the table, Birds is designed for good food, easy conversation and time well spent.Come for the food, stay for the atmosphere — and settle in for as long as you like.</div>
+		<div>Natural light, warm textures and considered details create a space that feels relaxed yet refined. From lunch and dinner to cocktails at the bar and celebrations around the table, Birds is designed for good food, easy conversation and time well spent. Come for the food, stay for the atmosphere and settle in for as long as you like.</div>
 		<div>Sichuan is part of our instinct — its fragrance, heat, acidity, depth and balance. Global influences allow each dish to take on its own character.
 
- Over ten years, these ideas have evolved into a culinary language of our own — layered, distinctive and free from convention.Every element is considered, from flavour and composition to presentation and the pieces chosen for the table.</div>
+ Over ten years, these ideas have evolved into a culinary language of our own — layered, distinctive and free from convention. Every element is considered, from flavour and composition to presentation and the pieces chosen for the table.</div>
 		<div>VIEW MENU</div>
 		<div>Our Food Philosophy
 
- Progressive Chuan Cuisine; Imagination is where we begin. Ten years in, and we still cook like it's the first day. Sichuan is our roots. It drives us and constantly sparks something new. Every dish is our way of sharing a thought, telling a story, and inviting you into a culture we're proud to call ours.</div>
-		<div>MAIN MENU
-</div>
+Progressive Cuisine with Chuan Influence; Imagination is where we begin. Ten years in, and we still cook like it's the first day. Sichuan is our roots. It drives us and constantly sparks something new. Every dish is our way of sharing a thought, telling a story, and inviting you into a culture we're proud to call ours.</div>
 		<div>All prices subject to prevailing GST and a 10% service charge.
 </div>
 		<div> 顶部标题区 EXECUTIVE MENU$35.90 Per Set
@@ -321,8 +305,6 @@ Wild Strawberry +$5Mini Gateaux, Hawthorn Berry Compote
 Tea +$4.5English Breakfast • Jasmine • Peppermint • Darjeeling • Organic Chamomile
 Coffee +$4.5Black, White
 </div>
-		<div>COCKTAIL MENU
-</div>
 		<div> 左列：Leisure Leisure
 $68++ per pax (min. 2 pax)
 In Sichuan, “Leisure” (闲) is a discipline, and a way of life. It’s a meal without urgency, savoured at a pace that lets flavour unfold rather than rushing to the next course. It’s a spirit that invites all to sit and share at the table; letting the meal reveal itself course by course.
@@ -358,10 +340,6 @@ Loup De MerWhole European Seabass Seared with Scale, Saffron Yellow Pepper Broth
 Sparkling Ice JellyKiwi, Moët, Dill Coulis, Muscat Grape & Mint Granita
 Red Date ‘Clafoutis’Fig, Macadamia, Buckwheat Candy, Mascarpone Crémeux, Red Date Jelly
 </div>
-		<div>WINE LIST
-</div>
-		<div>SET MENU
-</div>
 		<div>Weddings</div>
 		<div>PRIVATE EVENTS</div>
 		<div>For business dinners, brand events and private corporate occasions, Birds of a Feather offers a distinctive setting in the heart of Singapore. Bespoke menus, considered drinks and warm hospitality create an event that feels polished without losing character.</div>
@@ -390,11 +368,6 @@ Red Date ‘Clafoutis’Fig, Macadamia, Buckwheat Candy, Mascarpone Crémeux, Re
 Sichuan cuisine was unfamiliar territory. That became part of the journey.
 
 Over the years, repeated visits to Chengdu, conversations with chefs and makers, and a deepening understanding of Sichuan flavours, ingredients and techniques have shaped the way he cooks. Rather than following a fixed formula, Eugene draws from Sichuan flavour profiles, French technique, ideas from around the world and his own creative instinct — allowing each dish to find its own character. Nearly a decade later, that process of curiosity and exploration continues to shape the culinary language of Birds.</div>
-		<div>Our Story</div>
-		<div>A Decade of Exploration
-EndFragment</div>
-		<div>Come Home to Birds of a Feather</div>
-		<div>A NEST FOR KINDRED SPIRITS</div>
 		<div>Ten Years, Still Evolving, From 2016 to 2026 Birds of a Feather began on Amoy Street in 2016 with a simple idea: to create a place where different flavours, cultures and people could meet.Over the past decade, Birds has continued to evolve, in its cooking, its space and the way people experience it. What began as an exchange of culinary ideas has grown into a language of its own, rooted in Sichuan flavour, shaped by French technique and open to influences from around the world.Our name speaks to the instinct that certain people will always find their way to one another. It also carries an older reference to the Golden Sun Bird of Chengdu, a symbol of light, continuity and shared spirit. That sense of warmth, belonging and shared spirit sits at the heart of Birds.Set within two heritage shophouses, the restaurant and bar is shaped by natural light, warm timber, thoughtful details and a renewed sense of hospitality. From the dining room to the bar, it is a home for food, drinks, conversation and the people who make a table come alive.[if gte mso 9]><xml>
  <w:WordDocument>
   <w:View>Normal</w:View>
@@ -1043,6 +1016,11 @@ EndFragment</div>
 <![endif] StartFragment Ten years on, Birds is not becoming something different. It is becoming more fully itself.EndFragment
 
 </div>
+		<div>Our Story</div>
+		<div>A Decade of Exploration
+EndFragment</div>
+		<div>Come Home to Birds of a Feather</div>
+		<div>A NEST FOR KINDRED SPIRITS</div>
 		<div>Seconds
  Item 1 Strange Burrata (V) $26
 Strange Flavoured Sauce, Peanut Crumbs, Olive Tapenade, Cherry Tomato, ‘Pain Aux Yacai’
@@ -1114,7 +1092,12 @@ Rubia Gallega OP Rib, Sichuan-inspired Pepper Sauce, Baby Coloured Potato, Brocc
 Birds of a Feather reopens on September 5th.
 Step into our new chapter on Amoy Street, with a renewed space, an evolved menu and the same warmth that has shaped Birds for the past ten years.
 Come for lunch, dinner or cocktails at the bar, and be among the first to settle back in.</div>
-		<div>Sichuan is part of our instinct — its fragrance, heat, acidity, depth and balance. Global influences allow each dish to take on its own character.Over ten years, these ideas have evolved into a culinary language of our own — layered, distinctive and free from convention.Every element is considered, from flavour and composition to presentation and the pieces chosen for the table. EndFragment</div>
+		<div>Sichuan is part of our instinct — its fragrance, heat, acidity, depth and balance. Global influences allow each dish to take on its own character.Over ten years, these ideas have evolved into a culinary language of our own — layered, distinctive and free from convention. Every element is considered, from flavour and composition to presentation and the pieces chosen for the table. EndFragment</div>
+		<div>Instinct, Expression, Craft, Precision
+</div>
+		<div>Sichuan is part of our instinct — its fragrance, heat, acidity, depth and balance. Global influences allow each dish to take on its own character.
+
+ Over ten years, these ideas have evolved into a culinary language of our own — layered, distinctive and free from convention.Every element is considered, from flavour and composition to presentation and the pieces chosen for the table.</div>
 		<div>Birds of a Feather
 </div>
 		<div>Our Story
@@ -1148,7 +1131,7 @@ MONDAY- SUNDAY
 		<div>Privacy | Terms by The Foreign Project Group</div>
 		<div>Location
 
-115 Amoy Street Singapore 069935
+115 Amoy St, #01-01, Singapore 069935
 
 Tel: +65 9755 7115
 
@@ -1167,6 +1150,14 @@ SUNDAY
 11:30am - 3:00pm    5:30pm - 10:00pm</div>
 		<div>Visit Us On</div>
 		<div>Instagram ↗
+</div>
+		<div>Location
+
+115 Amoy Street Singapore 069935
+
+Tel: +65 9755 7115
+
+Email: enquiry@birdsofafeather.com.sg
 </div>
 		<div>Instagram ↗︎
 </div>
@@ -1523,6 +1514,14 @@ Passionate Spritz $13
 Yuzu · Passionfruit · Soda
 After Rain $13
 Black Tea · Yuzu · Citrus · Fresh Fruits
+</div>
+		<div>COCKTAIL MENU
+</div>
+		<div>SET MENU
+</div>
+		<div>WINE LIST
+</div>
+		<div>MAIN MENU
 </div>
 
 	</div>
