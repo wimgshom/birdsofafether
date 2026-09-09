@@ -50,7 +50,6 @@
   font-family: 'Special Elite', 'American Typewriter', monospace !important;
 }
 
-/* 美式打字机字体独立类名（备用） */
 .typewriter-text {
   font-family: 'Special Elite', 'American Typewriter', monospace !important;
 }
@@ -65,6 +64,18 @@
   opacity: 0.7 !important;
 }
 
+/* 确保所有 Hype 场景内部的元素正常接收鼠标点击 */
+.HYPE_scene, .HYPE_element {
+  pointer-events: auto;
+}
+
+/* 绝对杜绝粒子画板阻挡点击 */
+#hype-cursor-particles {
+  pointer-events: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
 /* 小鸟自定义鼠标指针 */
 html, body, .HYPE_document, * {
   cursor: url('birds%20website.hyperesources/bird-cursor.png') 6 5, auto !important;
@@ -74,25 +85,24 @@ a, button, [onclick], .hover-gray, .menu-item {
 }
 </style>
 
-<!-- 3. 🐦 小鸟阶梯跟随特效 (JS 动态 Canvas) -->
+<!-- 3. 🐦 小鸟阶梯跟随特效 (严格单例 + 永不遮挡点击) -->
 <script>
 (function() {
+  if (window.__birdParticlesInitialized || document.getElementById('hype-cursor-particles')) {
+    return;
+  }
+  window.__birdParticlesInitialized = true;
+
   function initParticleCanvas() {
-    if (document.getElementById('hype-cursor-particles')) return;
-    
+    var existing = document.getElementById('hype-cursor-particles');
+    if (existing) return;
+
     var canvas = document.createElement('canvas');
     canvas.id = 'hype-cursor-particles';
-    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none !important;z-index:999999;';
-    
-    if (document.body) {
-      document.body.appendChild(canvas);
-      setupParticles(canvas);
-    } else {
-      window.addEventListener('DOMContentLoaded', function() {
-        document.body.appendChild(canvas);
-        setupParticles(canvas);
-      });
-    }
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none !important;touch-action:none !important;z-index:9999;';
+
+    document.documentElement.appendChild(canvas);
+    setupParticles(canvas);
   }
 
   function setupParticles(canvas) {
@@ -106,20 +116,17 @@ a, button, [onclick], .hover-gray, .menu-item {
       canvas.height = window.innerHeight * dpr;
       ctx.scale(dpr, dpr);
     }
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', resize, { passive: true });
     resize();
 
     var mouse = { x: -100, y: -100 };
-    var offsetX = 0;
-    var offsetY = 0;
-
     var globalAlphaMultiplier = 0;
     var isMoving = false;
     var moveTimer = null;
 
     window.addEventListener('mousemove', function(e) {
-      mouse.x = e.clientX + offsetX;
-      mouse.y = e.clientY + offsetY;
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
       
       isMoving = true;
       clearTimeout(moveTimer);
@@ -127,7 +134,7 @@ a, button, [onclick], .hover-gray, .menu-item {
       moveTimer = setTimeout(function() {
         isMoving = false;
       }, 100);
-    });
+    }, { passive: true });
 
     var followers = [
       { x: -100, y: -100, size: 15, baseAlpha: 0.8, ease: 0.22 },
@@ -168,40 +175,40 @@ a, button, [onclick], .hover-gray, .menu-item {
     animate();
   }
 
-  initParticleCanvas();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initParticleCanvas);
+  } else {
+    initParticleCanvas();
+  }
 })();
 </script>
 
-<!-- 4. 路由防 404 定位（刷新时只执行一次，绝不干扰点击与转场） -->
+<!-- 4. 浏览器前进/后退安全监听（防误切 Home、防重复触发） -->
 <script>
-(function() {
-  var hasRouted = false;
+window.addEventListener('popstate', function(e) {
+  var doc = HYPE.documents[Object.keys(HYPE.documents)[0]];
+  if (!doc) return;
 
-  if (!window.HYPE_eventListeners) window.HYPE_eventListeners = [];
-  window.HYPE_eventListeners.push({
-    "type": "HypeSceneLoad",
-    "callback": function(hypeDocument, element, event) {
-      if (hasRouted) return;
-      hasRouted = true;
+  var currentScene = doc.currentSceneName();
+  var h = (window.location.hash || '').toLowerCase();
 
-      var h = window.location.hash.toLowerCase();
+  var targetScene = '';
+  if (h === '#mainmenu' || h === '#menu') {
+    targetScene = 'mainmenu';
+  } else if (h === '#events') {
+    targetScene = 'events';
+  } else if (h === '#ourstory' || h === '#story') {
+    targetScene = 'our story';
+  } else if (h === '#home') {
+    targetScene = 'home';
+  }
 
-      if (h === '#mainmenu' || h === '#menu') {
-        hypeDocument.showSceneNamed('mainmenu');
-      } else if (h === '#setmenu') {
-        hypeDocument.showSceneNamed('setmenu');
-      } else if (h === '#winelist') {
-        hypeDocument.showSceneNamed('winelist');
-      } else if (h === '#cocktail') {
-        hypeDocument.showSceneNamed('cocktail');
-      } else if (h === '#events') {
-        hypeDocument.showSceneNamed('Events');
-      } else if (h === '#story') {
-        hypeDocument.showSceneNamed('Our Story');
-      }
-    }
-  });
-})();
+  // 只有目标场景明确，且与当前所在场景不同时才执行跳转与回滚
+  if (targetScene && targetScene !== currentScene) {
+    doc.showSceneNamed(targetScene);
+    window.scrollTo(0, 0);
+  }
+});
 </script>
 
 	<!-- end copy -->
@@ -210,7 +217,7 @@ a, button, [onclick], .hover-gray, .menu-item {
 	<!-- copy these lines to your document: -->
 
 	<div id="birdswebsite_hype_container" class="HYPE_document" style="margin:auto;position:relative;width:100%;height:6800px;overflow:hidden;">
-		<script type="text/javascript" charset="utf-8" src="birds%20website.hyperesources/birdswebsite_hype_generated_script.js?97762"></script>
+		<script type="text/javascript" charset="utf-8" src="birds%20website.hyperesources/birdswebsite_hype_generated_script.js?16656"></script>
 	</div>
 
 	<!-- end copy -->
